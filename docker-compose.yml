@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .                  # raíz del proyecto
+      dockerfile: Dockerfile
+    container_name: nest-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env                      # usa MONGODB_URI/JWT_* desde .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      # Habilita autenticación y crea usuario root
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      # Base “por defecto” (opcional, nos da igual para los scripts)
+      MONGO_INITDB_DATABASE: jsrl_project
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d   # scripts de init (.js)
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  mongo-express:
+    image: mongo-express:1.0.0-alpha
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      # Puedes usar root para el panel (simple)...
+      ME_CONFIG_MONGODB_URL: "mongodb://root:example@mongo:27017/?authSource=admin"
+      # ...o si prefieres, luego lo cambias a api_user:
+      # ME_CONFIG_MONGODB_URL: "mongodb://api_user:api1234@mongo:27017/jsrl_project?authSource=jsrl_project"
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
