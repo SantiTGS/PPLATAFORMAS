@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Ride, RideDocument } from './schemas/ride.schema';
+import { Ride, RideDocument } from '../schemas/ride.schema';
 
 function toObjectId(idLike: any): Types.ObjectId {
   const value = typeof idLike === 'string' ? idLike : (idLike?.id ?? idLike?._id ?? idLike?.sub ?? idLike);

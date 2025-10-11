@@ -3,9 +3,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { RidesModule } from './rides/rides.module';
+import { AuthModule } from '../../auth/auth.module';
+import { UsersModule } from '../../users/modules/users.module';
+import { RidesModule } from '../../rides/modules/rides.module';
 
 @Module({
   imports: [

@@ -16,22 +16,24 @@ exports.RidesController = void 0;
 const common_1 = require("@nestjs/common");
 const rides_service_1 = require("./rides.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
-const create_ride_dto_1 = require("./dto/create-ride.dto");
 let RidesController = class RidesController {
     constructor(rides) {
         this.rides = rides;
     }
-    all() {
+    async all() {
         return this.rides.findAll();
     }
-    mine(req) {
-        return this.rides.findMine(req.user.sub);
+    async mine(req) {
+        var _a, _b;
+        return this.rides.findMine((_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub) !== null && _b !== void 0 ? _b : req.user);
     }
-    create(dto, req) {
-        return this.rides.create(dto, req.user.sub);
+    async create(dto, req) {
+        var _a, _b;
+        return this.rides.create((_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub) !== null && _b !== void 0 ? _b : req.user, dto);
     }
-    accept(id) {
-        return this.rides.accept(id);
+    async accept(id, req) {
+        var _a, _b;
+        return this.rides.accept(id, (_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a.sub) !== null && _b !== void 0 ? _b : req.user);
     }
 };
 exports.RidesController = RidesController;
@@ -39,33 +41,36 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], RidesController.prototype, "all", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('me'),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], RidesController.prototype, "mine", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Req)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_ride_dto_1.CreateRideDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
 ], RidesController.prototype, "create", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)(':id/accept'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], RidesController.prototype, "accept", null);
 exports.RidesController = RidesController = __decorate([
     (0, common_1.Controller)('rides'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [rides_service_1.RidesService])
 ], RidesController);
 //# sourceMappingURL=rides.controller.js.map

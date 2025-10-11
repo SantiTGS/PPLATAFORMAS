@@ -8,48 +8,85 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
-const bcrypt = require("bcrypt");
-const user_entity_1 = require("./entities/user.entity");
-const roles_enum_1 = require("../common/roles.enum");
+const mongoose_1 = require("@nestjs/mongoose");
+const mongoose_2 = require("mongoose");
+const user_schema_1 = require("./schemas/user.schema");
 let UsersService = class UsersService {
-    constructor() {
-        this.users = [];
-        this.idSeq = 1;
+    constructor(userModel) {
+        this.userModel = userModel;
         (async () => {
-            if (!(await this.findByEmail('admin@demo.com'))) {
+            const email = 'admin@demo.com';
+            const exists = await this.findByEmail(email);
+            if (!exists) {
                 await this.create({
-                    email: 'admin@demo.com',
+                    email,
                     name: 'Admin',
                     password: 'admin123',
-                    roles: [roles_enum_1.Role.Admin],
+                    roles: ['admin'],
+                    active: true,
                 });
             }
         })();
     }
-    async create(dto) {
-        var _a;
-        const u = new user_entity_1.User();
-        u.id = this.idSeq++;
-        u.email = dto.email.toLowerCase();
-        u.name = dto.name;
-        u.passwordHash = await bcrypt.hash(dto.password, 10);
-        u.roles = ((_a = dto.roles) === null || _a === void 0 ? void 0 : _a.length) ? dto.roles : [roles_enum_1.Role.User];
-        this.users.push(u);
-        return u;
-    }
-    async findByEmail(email) {
-        return this.users.find((u) => u.email === email.toLowerCase());
+    async create(data) {
+        var _a, _b;
+        try {
+            const doc = await this.userModel.create({
+                name: data.name,
+                email: data.email,
+                password: data.password,
+                roles: (_a = data.roles) !== null && _a !== void 0 ? _a : [],
+                active: (_b = data.active) !== null && _b !== void 0 ? _b : true,
+            });
+            return doc.toObject();
+        }
+        catch (err) {
+            if ((err === null || err === void 0 ? void 0 : err.code) === 11000) {
+                throw new common_1.ConflictException('Email ya existe');
+            }
+            throw err;
+        }
     }
     async findAll() {
-        return this.users.map(({ passwordHash, ...rest }) => rest);
+        return this.userModel.find().lean().exec();
+    }
+    async findByEmail(email) {
+        return this.userModel.findOne({ email: email.toLowerCase().trim() }).lean().exec();
+    }
+    async findById(id) {
+        return this.userModel.findById(id).lean().exec();
+    }
+    async update(id, patch) {
+        const doc = await this.userModel
+            .findByIdAndUpdate(id, {
+            $set: {
+                ...(patch.name !== undefined ? { name: patch.name } : {}),
+                ...(patch.email !== undefined ? { email: patch.email } : {}),
+                ...(patch.password !== undefined ? { password: patch.password } : {}),
+                ...(patch.passwordHash !== undefined ? { passwordHash: patch.passwordHash } : {}),
+                ...(patch.roles !== undefined ? { roles: patch.roles } : {}),
+                ...(patch.active !== undefined ? { active: patch.active } : {}),
+            },
+        }, { new: true, runValidators: true })
+            .lean()
+            .exec();
+        return doc;
+    }
+    async remove(id) {
+        const res = await this.userModel.findByIdAndDelete(id).lean().exec();
+        return res;
     }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
+    __metadata("design:paramtypes", [mongoose_2.Model])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

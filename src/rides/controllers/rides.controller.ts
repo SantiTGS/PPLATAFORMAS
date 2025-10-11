@@ -1,7 +1,7 @@
 // src/rides/rides.controller.ts
 import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
-import { RidesService } from './rides.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RidesService } from '../services/rides.service';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 @Controller('rides') // 👈 sin 'api/', el prefix lo pone main.ts
 export class RidesController {
