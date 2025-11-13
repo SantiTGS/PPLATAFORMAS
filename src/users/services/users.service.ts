@@ -1,4 +1,3 @@
-// src/users/users.service.ts
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,7 +8,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {
-    // Seed de admin tal como lo tenías, pero contra Mongo
+    // Seed de admin
     (async () => {
       const email = 'admin@demo.com';
       const exists = await this.findByEmail(email);
@@ -17,7 +16,7 @@ export class UsersService {
         await this.create({
           email,
           name: 'Admin',
-          password: 'admin123', // tu AuthService soporta hash o texto plano
+          password: 'admin123',
           roles: ['admin'],
           active: true,
         });
@@ -25,19 +24,27 @@ export class UsersService {
     })();
   }
 
-  // ==== CRUD básico ====
-
   async create(data: Partial<User>) {
     try {
-      const doc = await this.userModel.create({
+      // Preparar objeto para crear
+      const userData: any = {
         name: data.name,
         email: data.email,
-        // si en el futuro quieres bcrypt, guarda en passwordHash
-        password: data.password,
         roles: data.roles ?? [],
         active: data.active ?? true,
-      });
-      // devolvemos objeto plano
+      };
+
+      // Agregar passwordHash si existe (IMPORTANTE)
+      if (data.passwordHash) {
+        userData.passwordHash = data.passwordHash;
+      }
+
+      // Agregar password solo si existe (para seeds)
+      if (data.password && !data.passwordHash) {
+        userData.password = data.password;
+      }
+
+      const doc = await this.userModel.create(userData);
       return doc.toObject();
     } catch (err: any) {
       if (err?.code === 11000) {
@@ -48,7 +55,6 @@ export class UsersService {
   }
 
   async findAll() {
-    // lean() devuelve objetos planos (mejor rendimiento)
     return this.userModel.find().lean().exec();
   }
 

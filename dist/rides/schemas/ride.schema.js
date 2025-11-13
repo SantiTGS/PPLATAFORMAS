@@ -33,7 +33,19 @@ __decorate([
     __metadata("design:type", Number)
 ], Ride.prototype, "seats", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String, enum: ['pending', 'accepted', 'completed', 'canceled'], default: 'pending' }),
+    (0, mongoose_1.Prop)({ default: 1 }),
+    __metadata("design:type", Number)
+], Ride.prototype, "availableSeats", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true }),
+    __metadata("design:type", String)
+], Ride.prototype, "description", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: String,
+        enum: ['pending', 'accepted', 'completed', 'canceled'],
+        default: 'pending'
+    }),
     __metadata("design:type", String)
 ], Ride.prototype, "status", void 0);
 __decorate([
@@ -41,13 +53,14 @@ __decorate([
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Ride.prototype, "createdBy", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: user_schema_1.User.name, required: false, index: true }),
-    __metadata("design:type", mongoose_2.Types.ObjectId)
-], Ride.prototype, "acceptedBy", void 0);
+    (0, mongoose_1.Prop)({ type: [{ type: mongoose_2.Types.ObjectId, ref: user_schema_1.User.name }], default: [] }),
+    __metadata("design:type", Array)
+], Ride.prototype, "passengers", void 0);
 exports.Ride = Ride = __decorate([
     (0, mongoose_1.Schema)({ collection: 'rides', timestamps: true })
 ], Ride);
 exports.RideSchema = mongoose_1.SchemaFactory.createForClass(Ride);
 exports.RideSchema.index({ status: 1, createdAt: -1 });
 exports.RideSchema.index({ origin: 1, destination: 1 });
+exports.RideSchema.index({ createdBy: 1 });
 //# sourceMappingURL=ride.schema.js.map

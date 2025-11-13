@@ -1,37 +1,64 @@
 import { RidesService } from '../services/rides.service';
+import { CreateRideDto } from '../dto/create-ride.dto';
 export declare class RidesController {
     private readonly rides;
     constructor(rides: RidesService);
-    all(): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+    findAll(): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>)[]>;
-    mine(req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+    myRides(req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>)[]>;
-    create(dto: any, req: any): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+    myBookings(req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
-    }, {}, {}> & import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+    }> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>)[]>;
+    create(dto: CreateRideDto, req: any): Promise<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>>;
-    accept(id: string, req: any): Promise<import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+    }> & {
+        __v: number;
+    }>;
+    book(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }> & Required<{
         _id: import("mongoose").Types.ObjectId;
-    }>>;
+    }>) | null>;
+    cancelBooking(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>) | null>;
+    complete(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>) | null>;
+    cancel(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>) | null>;
 }

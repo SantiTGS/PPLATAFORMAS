@@ -6,9 +6,11 @@ export declare class Ride {
     destination: string;
     price: number;
     seats: number;
+    availableSeats: number;
+    description?: string;
     status: RideStatus;
     createdBy: Types.ObjectId;
-    acceptedBy?: Types.ObjectId;
+    passengers: Types.ObjectId[];
 }
 export declare const RideSchema: import("mongoose").Schema<Ride, import("mongoose").Model<Ride, any, any, any, import("mongoose").Document<unknown, any, Ride, any, {}> & Ride & {
     _id: Types.ObjectId;

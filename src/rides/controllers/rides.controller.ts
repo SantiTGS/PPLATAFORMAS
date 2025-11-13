@@ -1,32 +1,106 @@
-// src/rides/rides.controller.ts
-import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { 
+  Body, 
+  Controller, 
+  Get, 
+  Param, 
+  Post, 
+  Delete,
+  Request, 
+  UseGuards,
+  ValidationPipe 
+} from '@nestjs/common';
 import { RidesService } from '../services/rides.service';
+import { CreateRideDto } from '../dto/create-ride.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../common/roles.guard';
+import { Roles } from '../../common/roles.decorator';
+import { Role } from '../../common/roles.enum';
 
-@Controller('rides') // 👈 sin 'api/', el prefix lo pone main.ts
+@Controller('rides')
+@UseGuards(JwtAuthGuard)
 export class RidesController {
   constructor(private readonly rides: RidesService) {}
 
+  /**
+   * Listar todos los rides disponibles
+   * Público para usuarios autenticados
+   */
   @Get()
-  async all() {
+  async findAll() {
     return this.rides.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  async mine(@Request() req: any) {
-    return this.rides.findMine(req.user?.sub ?? req.user);
+  /**
+   * Mis rides como conductor
+   * Solo conductores y admins
+   */
+  @UseGuards(RolesGuard)
+  @Roles(Role.Driver, Role.Admin)
+  @Get('my-rides')
+  async myRides(@Request() req: any) {
+    return this.rides.findMyRides(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  /**
+   * Mis reservas como pasajero
+   * Todos los usuarios autenticados
+   */
+  @Get('my-bookings')
+  async myBookings(@Request() req: any) {
+    return this.rides.findMyBookings(req.user);
+  }
+
+  /**
+   * Crear un nuevo ride
+   * Solo conductores y admins
+   */
+  @UseGuards(RolesGuard)
+  @Roles(Role.Driver, Role.Admin)
   @Post()
-  async create(@Body() dto: any, @Request() req: any) {
-    return this.rides.create(req.user?.sub ?? req.user, dto);
+  async create(
+    @Body(ValidationPipe) dto: CreateRideDto,
+    @Request() req: any
+  ) {
+    return this.rides.create(req.user, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post(':id/accept')
-  async accept(@Param('id') id: string, @Request() req: any) {
-    return this.rides.accept(id, req.user?.sub ?? req.user);
+  /**
+   * Reservar un cupo en un ride
+   * Todos los usuarios autenticados
+   */
+  @Post(':id/book')
+  async book(@Param('id') id: string, @Request() req: any) {
+    return this.rides.bookRide(id, req.user);
+  }
+
+  /**
+   * Cancelar mi reserva en un ride
+   * Todos los usuarios autenticados
+   */
+  @Delete(':id/book')
+  async cancelBooking(@Param('id') id: string, @Request() req: any) {
+    return this.rides.cancelBooking(id, req.user);
+  }
+
+  /**
+   * Completar un ride
+   * Solo el conductor que lo creó
+   */
+  @UseGuards(RolesGuard)
+  @Roles(Role.Driver, Role.Admin)
+  @Post(':id/complete')
+  async complete(@Param('id') id: string, @Request() req: any) {
+    return this.rides.completeRide(id, req.user);
+  }
+
+  /**
+   * Cancelar un ride
+   * Solo el conductor que lo creó
+   */
+  @UseGuards(RolesGuard)
+  @Roles(Role.Driver, Role.Admin)
+  @Delete(':id')
+  async cancel(@Param('id') id: string, @Request() req: any) {
+    return this.rides.cancelRide(id, req.user);
   }
 }

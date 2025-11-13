@@ -1,8 +1,7 @@
 export declare class CreateRideDto {
-    from: string;
-    to: string;
-    date: string;
-    time: string;
+    origin: string;
+    destination: string;
     price: number;
-    seatsAvailable: number;
+    seats?: number;
+    description?: string;
 }

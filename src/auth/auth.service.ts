@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/services/users.service';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,20 +12,60 @@ export class AuthService {
   ) {}
 
   /**
-   * Login flow used by AuthController.
-   * Accepts email/password, validates against either passwordHash (preferred) or password (plaintext fallback),
-   * then signs a JWT with { sub, email, roles }.
+   * Registro de nuevo usuario
+   */
+  async register(dto: RegisterDto) {
+    // Verificar si el usuario ya existe
+    const existing = await this.users.findByEmail(dto.email);
+    if (existing) {
+      throw new ConflictException('El email ya está registrado');
+    }
+
+    // Hash de la contraseña
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    // Crear usuario con rol por defecto 'passenger' si no se especifica
+    const user = await this.users.create({
+      name: dto.name,
+      email: dto.email,
+      passwordHash,
+      roles: dto.roles || ['passenger'],
+      active: true,
+    });
+
+    // Generar token
+    const userId = (user as any)._id?.toString() || (user as any).id;
+    const payload = { 
+      sub: userId, 
+      email: user.email, 
+      roles: (user as any).roles 
+    };
+    const access_token = await this.jwt.signAsync(payload);
+
+    return {
+      access_token,
+      user: {
+        id: userId,
+        name: (user as any).name,
+        email: user.email,
+        roles: (user as any).roles,
+      },
+    };
+  }
+
+  /**
+   * Login flow
    */
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     // Support both hashed and plaintext (for existing seeded admins)
     const stored = (user as any).passwordHash ?? (user as any).password;
     if (!stored) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     let ok = false;
@@ -36,22 +77,21 @@ export class AuthService {
     }
 
     if (!ok) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Normalize id coming from SQL (id: number/string) or Mongo (ObjectId in _id)
-    const rawId = (user as any).id ?? (user as any)._id;
-    const userId =
-      typeof rawId === 'object'
-        ? (rawId && typeof rawId.toString === 'function' ? rawId.toString() : String(rawId))
-        : rawId;
-
-    const payload = { sub: userId, email: user.email, roles: (user as any).roles ?? [] };
+    // Normalize id
+    const userId = (user as any)._id?.toString() || (user as any).id;
+    const payload = { 
+      sub: userId, 
+      email: user.email, 
+      roles: (user as any).roles ?? [] 
+    };
     const access_token = await this.jwt.signAsync(payload);
 
-    // Return minimal safe user data
     const safeUser = {
       id: userId,
+      name: (user as any).name,
       email: user.email,
       roles: (user as any).roles ?? [],
     };
