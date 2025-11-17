@@ -13,8 +13,9 @@ async function bootstrap() {
     }));
     app.enableCors();
     const port = process.env.PORT || 4000;
-    await app.listen(port);
-    console.log(`🚀 API corriendo en http://localhost:${port}/api`);
+    await app.listen(4000, '0.0.0.0');
+    console.log(`🚀 API corriendo en http://localhost:4000/api`);
+    console.log(`📱 Acceso móvil: http://10.182.51.38:4000/api`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
