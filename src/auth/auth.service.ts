@@ -35,20 +35,23 @@ export class AuthService {
 
     // Generar token
     const userId = (user as any)._id?.toString() || (user as any).id;
+    const userRoles = (user as any).roles || [];
+    const userRole = userRoles[0] || 'passenger';
+    
     const payload = { 
       sub: userId, 
       email: user.email, 
-      roles: (user as any).roles 
+      roles: userRoles  // ← MANTENER ARRAY para el backend
     };
     const access_token = await this.jwt.signAsync(payload);
 
     return {
       access_token,
       user: {
-        id: userId,
+        _id: userId,
         name: (user as any).name,
         email: user.email,
-        roles: (user as any).roles,
+        role: userRole,  // ← String para el frontend
       },
     };
   }
@@ -56,8 +59,13 @@ export class AuthService {
   /**
    * Login flow
    */
-  async login(email: string, password: string) {
-    const user = await this.users.findByEmail(email);
+  async login(loginDto: { email: string; password: string }) {
+    // Validar que vengan los datos
+    if (!loginDto || !loginDto.email || !loginDto.password) {
+      throw new UnauthorizedException('Email y contraseña son requeridos');
+    }
+
+    const user = await this.users.findByEmail(loginDto.email);
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -69,31 +77,40 @@ export class AuthService {
     }
 
     let ok = false;
+    
     // If it looks like a bcrypt hash, compare; otherwise compare plaintext.
     if (typeof stored === 'string' && stored.startsWith('$2')) {
-      ok = await bcrypt.compare(password, stored);
+      // Es un hash de bcrypt - validar que tengamos el password
+      if (!loginDto.password) {
+        throw new UnauthorizedException('Credenciales inválidas');
+      }
+      ok = await bcrypt.compare(loginDto.password, stored);
     } else {
-      ok = stored === password;
+      // Es plaintext
+      ok = stored === loginDto.password;
     }
 
     if (!ok) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Normalize id
+    // Normalize id and roles
     const userId = (user as any)._id?.toString() || (user as any).id;
+    const userRoles = (user as any).roles ?? [];
+    const userRole = userRoles[0] || 'passenger';
+    
     const payload = { 
       sub: userId, 
       email: user.email, 
-      roles: (user as any).roles ?? [] 
+      roles: userRoles  // ← MANTENER ARRAY para el backend
     };
     const access_token = await this.jwt.signAsync(payload);
 
     const safeUser = {
-      id: userId,
+      _id: userId,
       name: (user as any).name,
       email: user.email,
-      roles: (user as any).roles ?? [],
+      role: userRole,  // ← String para el frontend
     };
 
     return { access_token, user: safeUser };

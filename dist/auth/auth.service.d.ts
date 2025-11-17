@@ -8,19 +8,22 @@ export declare class AuthService {
     register(dto: RegisterDto): Promise<{
         access_token: string;
         user: {
-            id: any;
+            _id: any;
             name: any;
             email: string;
-            roles: any;
+            role: any;
         };
     }>;
-    login(email: string, password: string): Promise<{
+    login(loginDto: {
+        email: string;
+        password: string;
+    }): Promise<{
         access_token: string;
         user: {
-            id: any;
+            _id: any;
             name: any;
             email: string;
-            roles: any;
+            role: any;
         };
     }>;
 }

@@ -36,6 +36,8 @@ let RidesService = class RidesService {
         const ride = await this.rideModel.create({
             origin: dto.origin,
             destination: dto.destination,
+            date: dto.date,
+            time: dto.time,
             price: dto.price,
             seats: (_a = dto.seats) !== null && _a !== void 0 ? _a : 1,
             availableSeats: (_b = dto.seats) !== null && _b !== void 0 ? _b : 1,
@@ -51,16 +53,28 @@ let RidesService = class RidesService {
             .find({ status: 'pending', availableSeats: { $gt: 0 } })
             .populate('createdBy', 'name email')
             .populate('passengers', 'name email')
-            .sort({ createdAt: -1 })
+            .sort({ date: 1, time: 1, createdAt: -1 })
             .lean()
             .exec();
+    }
+    async findOne(rideId) {
+        const ride = await this.rideModel
+            .findById(rideId)
+            .populate('createdBy', 'name email')
+            .populate('passengers', 'name email')
+            .lean()
+            .exec();
+        if (!ride) {
+            throw new common_1.NotFoundException('Ride no encontrado');
+        }
+        return ride;
     }
     async findMyRides(user) {
         const userId = toObjectId(user);
         return this.rideModel
             .find({ createdBy: userId })
             .populate('passengers', 'name email')
-            .sort({ createdAt: -1 })
+            .sort({ date: 1, time: 1, createdAt: -1 })
             .lean()
             .exec();
     }
@@ -70,11 +84,33 @@ let RidesService = class RidesService {
             .find({ passengers: userId })
             .populate('createdBy', 'name email')
             .populate('passengers', 'name email')
-            .sort({ createdAt: -1 })
+            .sort({ date: 1, time: 1, createdAt: -1 })
             .lean()
             .exec();
     }
-    async bookRide(rideId, user) {
+    async startRide(rideId, user) {
+        const userId = toObjectId(user);
+        const ride = await this.rideModel.findById(rideId);
+        if (!ride) {
+            throw new common_1.NotFoundException('Ride no encontrado');
+        }
+        if (ride.createdBy.toString() !== userId.toString()) {
+            throw new common_1.ForbiddenException('Solo el conductor puede iniciar el ride');
+        }
+        if (ride.status !== 'pending') {
+            throw new common_1.BadRequestException('Este ride ya fue iniciado o completado');
+        }
+        ride.status = 'accepted';
+        await ride.save();
+        const updated = await this.rideModel
+            .findById(ride._id)
+            .populate('createdBy', 'name email')
+            .populate('passengers', 'name email')
+            .lean()
+            .exec();
+        return updated;
+    }
+    async bookRide(rideId, user, seats = 1) {
         if (!rideId)
             throw new common_1.BadRequestException('ID de ride requerido');
         const userId = toObjectId(user);
@@ -88,14 +124,14 @@ let RidesService = class RidesService {
         if (ride.status !== 'pending') {
             throw new common_1.BadRequestException('Este ride no está disponible');
         }
-        if (ride.availableSeats <= 0) {
-            throw new common_1.BadRequestException('No hay cupos disponibles');
+        if (ride.availableSeats < seats) {
+            throw new common_1.BadRequestException(`Solo hay ${ride.availableSeats} cupo(s) disponible(s). Solicitaste ${seats}.`);
         }
         if (ride.passengers.some(p => p.toString() === userId.toString())) {
             throw new common_1.BadRequestException('Ya has reservado este ride');
         }
         ride.passengers.push(userId);
-        ride.availableSeats -= 1;
+        ride.availableSeats -= seats;
         if (ride.availableSeats === 0) {
             ride.status = 'accepted';
         }
@@ -160,6 +196,9 @@ let RidesService = class RidesService {
         if (ride.createdBy.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('Solo el conductor puede cancelar el ride');
         }
+        if (ride.status === 'completed' || ride.status === 'canceled') {
+            throw new common_1.BadRequestException('Este ride ya está completado o cancelado');
+        }
         ride.status = 'canceled';
         await ride.save();
         const updated = await this.rideModel
@@ -169,6 +208,21 @@ let RidesService = class RidesService {
             .lean()
             .exec();
         return updated;
+    }
+    async deleteRide(rideId, user) {
+        const userId = toObjectId(user);
+        const ride = await this.rideModel.findById(rideId);
+        if (!ride) {
+            throw new common_1.NotFoundException('Ride no encontrado');
+        }
+        if (ride.createdBy.toString() !== userId.toString()) {
+            throw new common_1.ForbiddenException('Solo el conductor puede eliminar el ride');
+        }
+        if (ride.status !== 'completed' && ride.status !== 'canceled') {
+            throw new common_1.BadRequestException('Solo puedes eliminar rides completados o cancelados');
+        }
+        await this.rideModel.findByIdAndDelete(rideId);
+        return { message: 'Ride eliminado exitosamente', id: rideId };
     }
 };
 exports.RidesService = RidesService;

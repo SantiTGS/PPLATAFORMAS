@@ -1,5 +1,6 @@
 import { RidesService } from '../services/rides.service';
 import { CreateRideDto } from '../dto/create-ride.dto';
+import { BookRideDto } from '../dto/book-ride.dto';
 export declare class RidesController {
     private readonly rides;
     constructor(rides: RidesService);
@@ -24,6 +25,13 @@ export declare class RidesController {
     }> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>)[]>;
+    findOne(id: string): Promise<import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>>;
     create(dto: CreateRideDto, req: any): Promise<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
@@ -33,7 +41,7 @@ export declare class RidesController {
     }> & {
         __v: number;
     }>;
-    book(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+    book(id: string, bookRideDto: BookRideDto, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -41,6 +49,13 @@ export declare class RidesController {
         _id: import("mongoose").Types.ObjectId;
     }>) | null>;
     cancelBooking(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>) | null>;
+    start(id: string, req: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("../schemas/ride.schema").Ride, {}, {}> & import("../schemas/ride.schema").Ride & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -61,4 +76,8 @@ export declare class RidesController {
     }> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>) | null>;
+    delete(id: string, req: any): Promise<{
+        message: string;
+        id: string;
+    }>;
 }

@@ -58,8 +58,24 @@ export class UsersService {
     return this.userModel.find().lean().exec();
   }
 
-  async findByEmail(email: string) {
-    return this.userModel.findOne({ email: email.toLowerCase().trim() }).lean().exec();
+  async findByEmail(email: string | any) {
+    // Validar y extraer el email como string
+    let emailStr: string;
+    
+    if (typeof email === 'string') {
+      emailStr = email;
+    } else if (email && typeof email === 'object' && email.email) {
+      emailStr = email.email;
+    } else {
+      return null;
+    }
+
+    // Validar que sea un string válido
+    if (!emailStr || typeof emailStr !== 'string') {
+      return null;
+    }
+
+    return this.userModel.findOne({ email: emailStr.toLowerCase().trim() }).lean().exec();
   }
 
   async findById(id: string) {

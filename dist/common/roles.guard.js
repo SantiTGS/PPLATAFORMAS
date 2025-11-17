@@ -26,7 +26,12 @@ let RolesGuard = class RolesGuard {
             return true;
         const request = ctx.switchToHttp().getRequest();
         const user = request.user;
-        return user && required.some((r) => { var _a; return (_a = user.roles) === null || _a === void 0 ? void 0 : _a.includes(r); });
+        const hasRole = user && required.some((r) => { var _a; return (_a = user.roles) === null || _a === void 0 ? void 0 : _a.includes(r); });
+        if (!hasRole) {
+            const rolesStr = required.join(' o ');
+            throw new common_1.ForbiddenException(`Esta acción requiere el rol: ${rolesStr}`);
+        }
+        return true;
     }
 };
 exports.RolesGuard = RolesGuard;

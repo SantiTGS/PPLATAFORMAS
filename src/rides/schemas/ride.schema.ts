@@ -13,6 +13,12 @@ export class Ride {
   @Prop({ required: true, trim: true }) 
   destination: string;
 
+  @Prop({ trim: true })  // ← NUEVO: Fecha del viaje
+  date?: string;
+
+  @Prop({ trim: true })  // ← NUEVO: Hora del viaje
+  time?: string;
+
   @Prop({ required: true, min: 0 }) 
   price: number;
 
@@ -43,3 +49,4 @@ export const RideSchema = SchemaFactory.createForClass(Ride);
 RideSchema.index({ status: 1, createdAt: -1 });
 RideSchema.index({ origin: 1, destination: 1 });
 RideSchema.index({ createdBy: 1 });
+RideSchema.index({ date: 1 }); // ← NUEVO: Índice para búsqueda por fecha

@@ -10,7 +10,7 @@ exports.RidesModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const rides_controller_1 = require("../controllers/rides.controller");
-const rides_service_1 = require("../../rides/services/rides.service");
+const rides_service_1 = require("../services/rides.service");
 const ride_schema_1 = require("../schemas/ride.schema");
 let RidesModule = class RidesModule {
 };

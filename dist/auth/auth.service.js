@@ -34,25 +34,30 @@ let AuthService = class AuthService {
             active: true,
         });
         const userId = ((_a = user._id) === null || _a === void 0 ? void 0 : _a.toString()) || user.id;
+        const userRoles = user.roles || [];
+        const userRole = userRoles[0] || 'passenger';
         const payload = {
             sub: userId,
             email: user.email,
-            roles: user.roles
+            roles: userRoles
         };
         const access_token = await this.jwt.signAsync(payload);
         return {
             access_token,
             user: {
-                id: userId,
+                _id: userId,
                 name: user.name,
                 email: user.email,
-                roles: user.roles,
+                role: userRole,
             },
         };
     }
-    async login(email, password) {
-        var _a, _b, _c, _d;
-        const user = await this.users.findByEmail(email);
+    async login(loginDto) {
+        var _a, _b, _c;
+        if (!loginDto || !loginDto.email || !loginDto.password) {
+            throw new common_1.UnauthorizedException('Email y contraseña son requeridos');
+        }
+        const user = await this.users.findByEmail(loginDto.email);
         if (!user) {
             throw new common_1.UnauthorizedException('Credenciales inválidas');
         }
@@ -62,26 +67,31 @@ let AuthService = class AuthService {
         }
         let ok = false;
         if (typeof stored === 'string' && stored.startsWith('$2')) {
-            ok = await bcrypt.compare(password, stored);
+            if (!loginDto.password) {
+                throw new common_1.UnauthorizedException('Credenciales inválidas');
+            }
+            ok = await bcrypt.compare(loginDto.password, stored);
         }
         else {
-            ok = stored === password;
+            ok = stored === loginDto.password;
         }
         if (!ok) {
             throw new common_1.UnauthorizedException('Credenciales inválidas');
         }
         const userId = ((_b = user._id) === null || _b === void 0 ? void 0 : _b.toString()) || user.id;
+        const userRoles = (_c = user.roles) !== null && _c !== void 0 ? _c : [];
+        const userRole = userRoles[0] || 'passenger';
         const payload = {
             sub: userId,
             email: user.email,
-            roles: (_c = user.roles) !== null && _c !== void 0 ? _c : []
+            roles: userRoles
         };
         const access_token = await this.jwt.signAsync(payload);
         const safeUser = {
-            id: userId,
+            _id: userId,
             name: user.name,
             email: user.email,
-            roles: (_d = user.roles) !== null && _d !== void 0 ? _d : [],
+            role: userRole,
         };
         return { access_token, user: safeUser };
     }

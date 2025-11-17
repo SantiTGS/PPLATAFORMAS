@@ -19,7 +19,7 @@ export declare class UsersService {
     }> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }>)[]>;
-    findByEmail(email: string): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, User, {}, {}> & User & {
+    findByEmail(email: string | any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, User, {}, {}> & User & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

@@ -4,6 +4,8 @@ export type RideStatus = 'pending' | 'accepted' | 'completed' | 'canceled';
 export declare class Ride {
     origin: string;
     destination: string;
+    date?: string;
+    time?: string;
     price: number;
     seats: number;
     availableSeats: number;

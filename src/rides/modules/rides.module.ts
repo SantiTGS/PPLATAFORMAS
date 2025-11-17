@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RidesController } from '../controllers/rides.controller';
-import { RidesService } from '../../rides/services/rides.service';
+import { RidesService } from '../services/rides.service';  // ← CORREGIDO
 import { Ride, RideSchema } from '../schemas/ride.schema';
 
 @Module({

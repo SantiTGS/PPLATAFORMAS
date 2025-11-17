@@ -25,6 +25,14 @@ __decorate([
     __metadata("design:type", String)
 ], Ride.prototype, "destination", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ trim: true }),
+    __metadata("design:type", String)
+], Ride.prototype, "date", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true }),
+    __metadata("design:type", String)
+], Ride.prototype, "time", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ required: true, min: 0 }),
     __metadata("design:type", Number)
 ], Ride.prototype, "price", void 0);
@@ -63,4 +71,5 @@ exports.RideSchema = mongoose_1.SchemaFactory.createForClass(Ride);
 exports.RideSchema.index({ status: 1, createdAt: -1 });
 exports.RideSchema.index({ origin: 1, destination: 1 });
 exports.RideSchema.index({ createdBy: 1 });
+exports.RideSchema.index({ date: 1 });
 //# sourceMappingURL=ride.schema.js.map

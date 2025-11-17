@@ -25,6 +25,16 @@ __decorate([
     __metadata("design:type", String)
 ], CreateRideDto.prototype, "destination", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateRideDto.prototype, "date", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateRideDto.prototype, "time", void 0);
+__decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0, { message: 'El precio debe ser mayor o igual a 0' }),
     __metadata("design:type", Number)

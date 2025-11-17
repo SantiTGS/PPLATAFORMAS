@@ -20,6 +20,13 @@ export declare class RidesService {
     }> & Required<{
         _id: Types.ObjectId;
     }>)[]>;
+    findOne(rideId: string): Promise<import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, Ride, {}, {}> & Ride & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: Types.ObjectId;
+    }>>;
     findMyRides(user: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, Ride, {}, {}> & Ride & {
         _id: Types.ObjectId;
     } & {
@@ -34,7 +41,14 @@ export declare class RidesService {
     }> & Required<{
         _id: Types.ObjectId;
     }>)[]>;
-    bookRide(rideId: string, user: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, Ride, {}, {}> & Ride & {
+    startRide(rideId: string, user: any): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, Ride, {}, {}> & Ride & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    }> & Required<{
+        _id: Types.ObjectId;
+    }>) | null>;
+    bookRide(rideId: string, user: any, seats?: number): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, Ride, {}, {}> & Ride & {
         _id: Types.ObjectId;
     } & {
         __v: number;
@@ -62,4 +76,8 @@ export declare class RidesService {
     }> & Required<{
         _id: Types.ObjectId;
     }>) | null>;
+    deleteRide(rideId: string, user: any): Promise<{
+        message: string;
+        id: string;
+    }>;
 }

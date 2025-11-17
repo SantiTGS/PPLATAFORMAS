@@ -37,13 +37,19 @@ let UsersService = class UsersService {
     async create(data) {
         var _a, _b;
         try {
-            const doc = await this.userModel.create({
+            const userData = {
                 name: data.name,
                 email: data.email,
-                password: data.password,
                 roles: (_a = data.roles) !== null && _a !== void 0 ? _a : [],
                 active: (_b = data.active) !== null && _b !== void 0 ? _b : true,
-            });
+            };
+            if (data.passwordHash) {
+                userData.passwordHash = data.passwordHash;
+            }
+            if (data.password && !data.passwordHash) {
+                userData.password = data.password;
+            }
+            const doc = await this.userModel.create(userData);
             return doc.toObject();
         }
         catch (err) {
@@ -57,7 +63,20 @@ let UsersService = class UsersService {
         return this.userModel.find().lean().exec();
     }
     async findByEmail(email) {
-        return this.userModel.findOne({ email: email.toLowerCase().trim() }).lean().exec();
+        let emailStr;
+        if (typeof email === 'string') {
+            emailStr = email;
+        }
+        else if (email && typeof email === 'object' && email.email) {
+            emailStr = email.email;
+        }
+        else {
+            return null;
+        }
+        if (!emailStr || typeof emailStr !== 'string') {
+            return null;
+        }
+        return this.userModel.findOne({ email: emailStr.toLowerCase().trim() }).lean().exec();
     }
     async findById(id) {
         return this.userModel.findById(id).lean().exec();

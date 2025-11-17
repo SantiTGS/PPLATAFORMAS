@@ -9,6 +9,14 @@ export class CreateRideDto {
   @MinLength(3, { message: 'El destino debe tener al menos 3 caracteres' })
   destination: string;
 
+  @IsString()
+  @IsOptional()
+  date?: string;
+
+  @IsString()
+  @IsOptional()
+  time?: string;
+
   @IsNumber()
   @Min(0, { message: 'El precio debe ser mayor o igual a 0' })
   price: number;
