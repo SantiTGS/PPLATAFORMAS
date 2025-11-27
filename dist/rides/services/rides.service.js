@@ -49,8 +49,16 @@ let RidesService = class RidesService {
         return ride.toObject();
     }
     async findAll() {
+        const now = new Date();
+        const colombiaOffset = -5 * 60;
+        const colombiaTime = new Date(now.getTime() + (now.getTimezoneOffset() + colombiaOffset) * 60000);
+        const todayString = colombiaTime.toISOString().split('T')[0];
         return this.rideModel
-            .find({ status: 'pending', availableSeats: { $gt: 0 } })
+            .find({
+            status: 'pending',
+            availableSeats: { $gt: 0 },
+            date: { $gte: todayString }
+        })
             .populate('createdBy', 'name email')
             .populate('passengers', 'name email')
             .sort({ date: 1, time: 1, createdAt: -1 })

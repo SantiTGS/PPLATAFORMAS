@@ -46,19 +46,29 @@ export class RidesService {
     return ride.toObject();
   }
 
+  
   /**
-   * Listar todos los rides disponibles (con cupos)
-   */
-  async findAll() {
-    return this.rideModel
-      .find({ status: 'pending', availableSeats: { $gt: 0 } })
-      .populate('createdBy', 'name email')
-      .populate('passengers', 'name email')
-      .sort({ date: 1, time: 1, createdAt: -1 }) // Ordenar por fecha y hora
-      .lean()
-      .exec();
-  }
+ * Listar todos los rides disponibles (con cupos y fecha actual o futura)
+ */
+async findAll() {
+  // Obtener fecha actual en Colombia (UTC-5)
+  const now = new Date();
+  const colombiaOffset = -5 * 60; // -5 horas en minutos
+  const colombiaTime = new Date(now.getTime() + (now.getTimezoneOffset() + colombiaOffset) * 60000);
+  const todayString = colombiaTime.toISOString().split('T')[0]; // "2025-11-25"
 
+  return this.rideModel
+    .find({ 
+      status: 'pending', 
+      availableSeats: { $gt: 0 },
+      date: { $gte: todayString }  // Solo viajes de hoy en adelante
+    })
+    .populate('createdBy', 'name email')
+    .populate('passengers', 'name email')
+    .sort({ date: 1, time: 1, createdAt: -1 })
+    .lean()
+    .exec();
+}
   /**
    * Obtener un ride por ID
    */
